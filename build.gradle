@@ -1,6 +1,18 @@
-apply plugin: 'maven'
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0"
+  }
+}
+
+apply plugin: 'maven-publish'
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: "com.github.johnrengelman.shadow"
 
 repositories {
     maven {
@@ -12,49 +24,17 @@ repositories {
 group = 'net.minecraft'
 archivesBaseName = 'launchwrapper'
 version = '1.12'
-sourceCompatibility = 1.6
+sourceCompatibility = 1.8
 
 dependencies {
-    compile 'net.sf.jopt-simple:jopt-simple:4.5'
-    compile 'org.ow2.asm:asm-debug-all:5.0.3'
-    compile 'org.lwjgl.lwjgl:lwjgl:2.9.1'
-    compile 'org.apache.logging.log4j:log4j-core:2.0-beta9'
-    compile 'org.apache.logging.log4j:log4j-api:2.0-beta9'
+    implementation 'net.sf.jopt-simple:jopt-simple:4.5'
+    implementation 'org.ow2.asm:asm-debug-all:5.0.3'
+    implementation 'org.lwjgl.lwjgl:lwjgl:2.9.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.0-beta9'
+    implementation 'org.apache.logging.log4j:log4j-api:2.0-beta9'
 }
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
-}
-
-artifacts {
-    archives jar
-    archives sourcesJar
-}
-
-def repoDir = new File(projectDir, "repo")
-repoDir.mkdirs()
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "file://" + repoDir.absolutePath)
-
-            pom.project {
-                description 'Minecraft LegacyLauncher'
-                url 'http://github.com/Mojang/LegacyLauncher'
-            }
-        }
-    }
-
-    doLast {
-        // Purge all annoying files that arent needed
-        repoDir.traverse(type: groovy.io.FileType.FILES, nameFilter: ~/.*\.(xml(?:\.sha1)?|md5)$/) {
-            it.delete()
-        }
-    }
-}
-
-clean << {
-    repoDir.deleteDir()
 }
