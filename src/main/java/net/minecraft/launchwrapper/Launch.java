@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.Level;
+
 public class Launch {
     private static final String DEFAULT_TWEAK = "net.minecraft.launchwrapper.VanillaTweaker";
     public static File minecraftHome;
@@ -82,14 +84,14 @@ public class Launch {
                     final String tweakName = it.next();
                     // Safety check - don't reprocess something we've already visited
                     if (allTweakerNames.contains(tweakName)) {
-                        LogWrapper.warning("Tweak class name %s has already been visited -- skipping", tweakName);
+                        LogWrapper.log(Level.WARN, "Tweak class name %s has already been visited -- skipping", tweakName);
                         // remove the tweaker from the stack otherwise it will create an infinite loop
                         it.remove();
                         continue;
                     } else {
                         allTweakerNames.add(tweakName);
                     }
-                    LogWrapper.info("Loading tweak class name %s", tweakName);
+                    LogWrapper.log(Level.INFO, "Loading tweak class name %s", tweakName);
 
                     // Ensure we allow the tweak class to load with the parent classloader
                     classLoader.addClassLoaderExclusion(tweakName.substring(0,tweakName.lastIndexOf('.')));
@@ -100,7 +102,7 @@ public class Launch {
                     it.remove();
                     // If we haven't visited a tweaker yet, the first will become the 'primary' tweaker
                     if (primaryTweaker == null) {
-                        LogWrapper.info("Using primary tweak class name %s", tweakName);
+                        LogWrapper.log(Level.INFO, "Using primary tweak class name %s", tweakName);
                         primaryTweaker = tweaker;
                     }
                 }
@@ -108,7 +110,7 @@ public class Launch {
                 // Now, iterate all the tweakers we just instantiated
                 for (final Iterator<ITweaker> it = tweakers.iterator(); it.hasNext(); ) {
                     final ITweaker tweaker = it.next();
-                    LogWrapper.info("Calling tweak class %s", tweaker.getClass().getName());
+                    LogWrapper.log(Level.INFO, "Calling tweak class %s", tweaker.getClass().getName());
                     tweaker.acceptOptions(options.valuesOf(nonOption), minecraftHome, assetsDir, profileName);
                     tweaker.injectIntoClassLoader(classLoader);
                     allTweakers.add(tweaker);
@@ -132,7 +134,7 @@ public class Launch {
             LogWrapper.info("Launching wrapped minecraft {%s}", launchTarget);
             mainMethod.invoke(null, (Object) argumentList.toArray(new String[argumentList.size()]));
         } catch (Exception e) {
-            LogWrapper.severe("Unable to launch", e);
+            LogWrapper.log(Level.ERROR, e, "Unable to launch");
             System.exit(1);
         }
     }
