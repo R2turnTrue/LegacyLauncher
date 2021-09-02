@@ -15,8 +15,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 
 public class LaunchClassLoader extends URLClassLoader {
     public static final int BUFFER_SIZE = 1 << 12;
